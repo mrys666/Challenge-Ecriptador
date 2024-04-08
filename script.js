@@ -1,48 +1,47 @@
-const textArea = document.querySelector(".text-area");
-const mensaje = document.querySelector(" .mensaje");
+const alfabeto = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","Ñ","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+const inputOriginal = document.getElementById('input-original');
+const cifrador = document.getElementById('cifrador');
+const resultado = document.getElementById('resultado');
+const rango = document.getElementById('rango');
 
-const matrizCodigo = [
-    ["e", "entender"],
-    ["i", "imes"],
-    ["a", "ai"],
-    ["o", "ober"],
-    ["u", "ufat"]
-]
-
-function btn_Encriptar(){
-    const textoEncriptado = encriptar(textArea.value)
-
-    mensaje.value = textoEncriptado;
-    textArea.value = ""
+const shifMessage = () => {
+    const wordArray = [...inputOriginal.value.toUpperCase()];
+    printChar(0, wordArray);
 }
 
-function btn_Desencriptar(){
-    const textoDesencriptado = descencriptar(textArea.value)
-    mensaje.value = textoDesencriptado
-    textArea.value = ""
+const printChar = (currentLetterIndex, wordArray) => {
+    if(wordArray.length === currentLetterIndex) return;
+    inputOriginal.value = inputOriginal.value.substring(1)
+    const spanChar = document.createElement("span");
+    resultado.appendChild(spanChar);
+    animateChar(spanChar)
+        .then( () => {
+            const charSinCodificar = wordArray[currentLetterIndex];
+            spanChar.innerHTML = alfabeto.includes(charSinCodificar) ? 
+                alfabeto[(alfabeto.indexOf(charSinCodificar) + parseInt(rango.value)) % alfabeto.length] : 
+                charSinCodificar
+            printChar(currentLetterIndex + 1, wordArray);
+        });
 }
 
-function encriptar(stringEncriptado){
-    stringEncriptado = stringEncriptado.toLowerCase()
-    for (let i=0; i < matrizCodigo.length; i++) {
-        if (stringEncriptado.includes(matrizCodigo[i][0])) {
-            stringEncriptado = stringEncriptado.replaceAll(matrizCodigo[i][0], matrizCodigo[i][1])
-        }      
-    }
-    return stringEncriptado;
+const animateChar = spanChar => {
+    let cambiosDeLetra = 0;
+    return new Promise(resolve => {
+        const intervalo = setInterval(() => {
+            spanChar.innerHTML = alfabeto[Math.floor(Math.random() * alfabeto.length)];
+            cambiosDeLetra++;
+            if(cambiosDeLetra === 3) {
+                clearInterval(intervalo);
+                resolve();
+            }
+        }, 50);
+    });
 }
 
-function descencriptar(stringDesencriptado){
-    stringDesencriptado = stringDesencriptado.toLowerCase()
-    for(let i=0; i<matrizCodigo.length; i++){
-        if (stringDesencriptado.includes(matrizCodigo[i][1])) {
-            stringDesencriptado = stringDesencriptado.replaceAll(matrizCodigo[i][1], matrizCodigo[i][0])
-        }
-    }
-    return stringDesencriptado;
+const submit = e => {
+    e.preventDefault();
+    resultado.innerHTML = '';
+    shifMessage()
 }
 
-function btn_Copiar(){
-    const textoCopiado = mensaje.value;
-    navigator.clipboard.writeText(textoCopiado);
-}
+cifrador.onsubmit = submit;
